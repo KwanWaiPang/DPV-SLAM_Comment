@@ -1,4 +1,4 @@
-[comment]: <> (# DBA-Fusion)
+[comment]: <> (# DPV-SLAM)
 
 <!-- PROJECT LOGO -->
 
@@ -16,3 +16,10 @@
   <div align="center"></div>
 
 # 配置过程记录
+* 下载源码并配置conda环境。虽然之前已经配置过dpvo的环境了，但是看yaml代码似乎变换比较大，重新配置为dpv_slam
+~~~
+git clone https://github.com/princeton-vl/DPVO.git --recursive
+
+conda env create -f environment.yml
+conda activate dpv_slam
+~~~

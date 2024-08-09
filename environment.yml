@@ -1,4 +1,4 @@
-name: dpvo
+name: dpv_slam
 channels:
   - pyg
   - pytorch
