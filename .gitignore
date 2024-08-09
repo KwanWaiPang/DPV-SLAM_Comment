@@ -161,3 +161,4 @@ datasets/TartanAir.pickle
 datasets/TartanAir
 TartanAirResults
 # thirdparty/*
+movies/*

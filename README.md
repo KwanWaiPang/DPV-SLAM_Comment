@@ -48,7 +48,7 @@ cmake ..
 make -j8
 sudo make install
 cd ../..
-pip install ./DPViewer
+pip install ./DPViewer #这个应该是安装到conda环境中的~
 ~~~
 * 对于回环部分
 ~~~
@@ -61,7 +61,7 @@ cmake .. # tested with cmake 3.22.1 and gcc/cc 11.4.0 on Ubuntu
 make # tested with GNU Make 4.3
 sudo make install
 cd ../..
-pip install ./DPRetrieval
+pip install ./DPRetrieval #这个应该是安装到conda环境中的~
 ~~~
 
 # 运行测试
@@ -79,13 +79,11 @@ python demo.py \
 # 采用iphone数据
 conda activate dpv_slam
 
-CUDA_VISIBLE_DEVICES=3 python demo.py \
-    --network=/home/gwp/DPVO/dpvo.pth \
-    --imagedir=/home/gwp/DPVO/movies/IMG_0482.MOV \
-    --calib=/home/gwp/DPVO/calib/iphone.txt\
+#重新下载数据和模型
+python demo.py \
+    --imagedir=movies/IMG_0492.MOV  \
+    --calib=calib/iphone.txt\
     --viz \
-    --plot \
-    --save_reconstruction \
     --save_trajectory \
     --opts LOOP_CLOSURE True
 ~~~
