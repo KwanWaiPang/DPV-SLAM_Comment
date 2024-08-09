@@ -95,7 +95,7 @@ downloads/
 #Pipfile.lock
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
+# __pypackages__/
 
 # Celery stuff
 # celerybeat-schedule
@@ -113,29 +113,29 @@ __pypackages__/
 # env.bak/
 # venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
+# # Spyder project settings
+# .spyderproject
+# .spyproject
 
-# Rope project settings
-.ropeproject
+# # Rope project settings
+# .ropeproject
 
-# mkdocs documentation
-/site
+# # mkdocs documentation
+# /site
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# # mypy
+# .mypy_cache/
+# .dmypy.json
+# dmypy.json
 
-# Pyre type checker
-.pyre/
+# # Pyre type checker
+# .pyre/
 
-# pytype static type analyzer
-.pytype/
+# # pytype static type analyzer
+# .pytype/
 
-# Cython debug symbols
-cython_debug/
+# # Cython debug symbols
+# cython_debug/
 
 
 
