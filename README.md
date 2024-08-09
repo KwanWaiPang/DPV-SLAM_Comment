@@ -26,10 +26,11 @@ conda activate dpv_slam
 
 * 下载安装eigen库以及安装DPVO包
 ~~~
+#如果直接用本仓库的代码不需要下载
 wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
 unzip eigen-3.4.0.zip -d thirdparty
 
-# install DPVO
+# install DPVO (感觉配置文件有点问题，尝试换回DPVO conda环境。conda activate dpvo)
 pip install .
 
 #模型直接用回之前的试试
@@ -38,3 +39,28 @@ pip install .
 数据地址为：
 /home/gwp/DPVO/movies/
 ~~~
+* 安装可视化工具
+~~~
+./Pangolin/scripts/install_prerequisites.sh recommended #前面应该已经安装过的了~
+mkdir Pangolin/build && cd Pangolin/build
+cmake ..
+make -j8
+sudo make install
+cd ../..
+pip install ./DPViewer
+~~~
+* 对于回环部分
+~~~
+# 首先需要安装opencv
+sudo apt-get install -y libopencv-dev
+
+cd DBoW2
+mkdir -p build && cd build
+cmake .. # tested with cmake 3.22.1 and gcc/cc 11.4.0 on Ubuntu
+make # tested with GNU Make 4.3
+sudo make install
+cd ../..
+pip install ./DPRetrieval
+~~~
+
+# 运行测试
