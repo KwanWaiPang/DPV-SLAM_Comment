@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: dpviewer
+Version: 0.0.1
+Author: Zachary Teed
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"

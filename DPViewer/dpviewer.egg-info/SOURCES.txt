@@ -1,0 +1,8 @@
+setup.py
+dpviewer/__init__.py
+dpviewer.egg-info/PKG-INFO
+dpviewer.egg-info/SOURCES.txt
+dpviewer.egg-info/dependency_links.txt
+dpviewer.egg-info/not-zip-safe
+dpviewer.egg-info/requires.txt
+dpviewer.egg-info/top_level.txt
