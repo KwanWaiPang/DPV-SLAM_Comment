@@ -4,7 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from evo.core import sync
 from evo.core.trajectory import PoseTrajectory3D
+
+# for the sever useer, we need to set the backend from "TkAgg" to "Agg"
+from evo.tools.settings import SETTINGS
+SETTINGS['plot_backend'] = 'Agg'
 from evo.tools import plot
+
 from plyfile import PlyData, PlyElement
 
 

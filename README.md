@@ -84,6 +84,7 @@ python demo.py \
     --imagedir=movies/IMG_0492.MOV  \
     --calib=calib/iphone.txt\
     --viz \
+    --plot \
     --save_trajectory \
     --opts LOOP_CLOSURE True
 ~~~
