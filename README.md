@@ -15,6 +15,11 @@
   </h3>
   <div align="center"></div>
 
+
+<p align="center">
+  <img width="90%" src="datasets/微信截图_20240809172800.png">
+</p>
+
 # 配置过程记录
 * 下载源码并配置conda环境。虽然之前已经配置过dpvo的环境了，但是看yaml代码似乎变换比较大，重新配置为dpv_slam
 ~~~
@@ -81,10 +86,13 @@ conda activate dpv_slam
 
 #重新下载数据和模型
 python demo.py \
-    --imagedir=movies/IMG_0492.MOV  \
+    --imagedir=movies/IMG_0495.MOV  \
     --calib=calib/iphone.txt\
     --viz \
     --plot \
     --save_trajectory \
+    --save_colmap\
     --opts LOOP_CLOSURE True
 ~~~
+
+测试效果请见B站链接<sup>[1](**), [2](**)</sup>.感觉可视化效果有待改进~~~
