@@ -37,50 +37,50 @@ downloads/
 # pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
+# htmlcov/
+# .tox/
+# .nox/
+# .coverage
+# .coverage.*
+# .cache
+# nosetests.xml
+# coverage.xml
+# *.cover
+# *.py,cover
+# .hypothesis/
+# .pytest_cache/
+# cover/
 
 # Translations
-*.mo
-*.pot
+# *.mo
+# *.pot
 
 # Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+# *.log
+# local_settings.py
+# db.sqlite3
+# db.sqlite3-journal
 
 # Flask stuff:
-instance/
-.webassets-cache
+# instance/
+# .webassets-cache
 
 # Scrapy stuff:
-.scrapy
+# .scrapy
 
 # Sphinx documentation
-docs/_build/
+# docs/_build/
 
 # PyBuilder
-.pybuilder/
-target/
+# .pybuilder/
+# target/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+# .ipynb_checkpoints
 
 # IPython
-profile_default/
-ipython_config.py
+# profile_default/
+# ipython_config.py
 
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
@@ -98,20 +98,20 @@ ipython_config.py
 __pypackages__/
 
 # Celery stuff
-celerybeat-schedule
-celerybeat.pid
+# celerybeat-schedule
+# celerybeat.pid
 
 # SageMath parsed files
-*.sage.py
+# *.sage.py
 
 # Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# .env
+# .venv
+# env/
+# venv/
+# ENV/
+# env.bak/
+# venv.bak/
 
 # Spyder project settings
 .spyderproject
