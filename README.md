@@ -23,3 +23,18 @@ git clone https://github.com/princeton-vl/DPVO.git --recursive
 conda env create -f environment.yml
 conda activate dpv_slam
 ~~~
+
+* 下载安装eigen库以及安装DPVO包
+~~~
+wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
+unzip eigen-3.4.0.zip -d thirdparty
+
+# install DPVO
+pip install .
+
+#模型直接用回之前的试试
+地址为：
+/home/gwp/DPVO/dpvo.pth
+数据地址为：
+/home/gwp/DPVO/movies/
+~~~
