@@ -22,6 +22,7 @@ git clone https://github.com/princeton-vl/DPVO.git --recursive
 
 conda env create -f environment.yml
 conda activate dpv_slam
+conda remove --name dpv_slam --all
 ~~~
 
 * 下载安装eigen库以及安装DPVO包
@@ -30,7 +31,7 @@ conda activate dpv_slam
 wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
 unzip eigen-3.4.0.zip -d thirdparty
 
-# install DPVO (感觉配置文件有点问题，尝试换回DPVO conda环境。conda activate dpvo)
+# install DPVO (感觉配置文件有点问题，尝试换回DPVO conda环境。conda activate dpvo但是这又导致需要重新配置，为此还是修改environment里面的版本吧~)
 pip install .
 
 #模型直接用回之前的试试
@@ -64,3 +65,27 @@ pip install ./DPRetrieval
 ~~~
 
 # 运行测试
+~~~
+python demo.py \
+    --imagedir=<path to image directory or video> \
+    --calib=<path to calibration file> \
+    --viz # enable visualization
+    --plot # save trajectory plot
+    --save_ply # save point cloud as a .ply file
+    --save_trajectory # save the predicted trajectory as .txt in TUM format
+    --save_colmap # save point cloud + trajectory in the standard COLMAP text 
+    --opts LOOP_CLOSURE True # To run DPVO with a SLAM backend (i.e., DPV-SLAM), add
+    
+# 采用iphone数据
+conda activate dpv_slam
+
+CUDA_VISIBLE_DEVICES=3 python demo.py \
+    --network=/home/gwp/DPVO/dpvo.pth \
+    --imagedir=/home/gwp/DPVO/movies/IMG_0482.MOV \
+    --calib=/home/gwp/DPVO/calib/iphone.txt\
+    --viz \
+    --plot \
+    --save_reconstruction \
+    --save_trajectory \
+    --opts LOOP_CLOSURE True
+~~~
