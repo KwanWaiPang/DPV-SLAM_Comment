@@ -15,6 +15,7 @@
 typedef unsigned char uchar;
 
 std::mutex mtx;
+std::mutex mtx_update;
 
 class Viewer {
   public:
@@ -42,6 +43,7 @@ class Viewer {
 
     // main visualization
     void run();
+    void loop();
 
   private:
     bool running;
@@ -76,8 +78,8 @@ class Viewer {
 
     // OpenGL buffers (vertex buffer, color buffer)
     GLuint vbo, cbo;
-    struct cudaGraphicsResource *xyz_res;
-    struct cudaGraphicsResource *rgb_res;
+    struct cudaGraphicsResource *xyz_res=nullptr;
+    struct cudaGraphicsResource *rgb_res=nullptr;
 
 };
 
@@ -97,44 +99,28 @@ Viewer::Viewer(
   ux = 0;
   h = image.size(0);
   w = image.size(1);
-
+  transformMatrix = poseToMatrix(poses);
+  transformMatrix = transformMatrix.transpose(1,2);
+  transformMatrix = transformMatrix.contiguous().to(torch::kCPU);
   tViewer = std::thread(&Viewer::run, this);
 };
 
 void Viewer::drawPoints() {
-  float *xyz_ptr;
-  uchar *rgb_ptr;
-  size_t xyz_bytes;
-  size_t rgb_bytes; 
+  auto b = points.cpu();
+  float *xyz_data = b.data_ptr<float>();
 
-  unsigned int size_xyz = 3 * points.size(0) * sizeof(float);
-  unsigned int size_rgb = 3 * points.size(0) * sizeof(uchar);
+  auto c = colors.cpu();
+  uchar *rgb_data = c.data_ptr<uchar>();
 
-  cudaGraphicsResourceGetMappedPointer((void **) &xyz_ptr, &xyz_bytes, xyz_res);
-  cudaGraphicsResourceGetMappedPointer((void **) &rgb_ptr, &rgb_bytes, rgb_res);
+  glPointSize(10.0f);
+  glBegin(GL_POINTS);
 
-  float *xyz_data = points.data_ptr<float>();
-  cudaMemcpy(xyz_ptr, xyz_data, xyz_bytes, cudaMemcpyDeviceToDevice);
+  for (auto i = 0; i < points.size(0); i+=3) {
 
-  uchar *rgb_data = colors.data_ptr<uchar>();
-  cudaMemcpy(rgb_ptr, rgb_data, rgb_bytes, cudaMemcpyDeviceToDevice);
-
-  // bind color buffer
-  glBindBuffer(GL_ARRAY_BUFFER, cbo);
-  glColorPointer(3, GL_UNSIGNED_BYTE, 0, 0);
-  glEnableClientState(GL_COLOR_ARRAY);
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glVertexPointer(3, GL_FLOAT, 0, 0);
-
-  // bind vertex buffer
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glDrawArrays(GL_POINTS, 0, points.size(0));
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  glDisableClientState(GL_COLOR_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glColor4ub(*(rgb_data + i), *(rgb_data + i + 1), *(rgb_data + i + 2), 255);
+    glVertex3f(*(xyz_data + i), *(xyz_data + i + 1), *(xyz_data + 2 + i));
+  }
+  glEnd();
 
 }
 
@@ -268,13 +254,15 @@ void Viewer::run() {
     Visualization3D_display.Activate(Visualization3D_camera);
   
     // maybe possible to draw cameras without copying to CPU?
-    transformMatrix = poseToMatrix(poses);
-    transformMatrix = transformMatrix.transpose(1,2);
-    transformMatrix = transformMatrix.contiguous().to(torch::kCPU);
+    // transformMatrix = poseToMatrix(poses);
+    // transformMatrix = transformMatrix.transpose(1,2);
+    // transformMatrix = transformMatrix.contiguous().to(torch::kCPU);
 
     // draw poses using OpenGL
+    mtx_update.lock();
     drawPoints();
     drawPoses();
+    mtx_update.unlock();
 
     mtx.lock();
     if (redraw) {
@@ -296,7 +284,13 @@ void Viewer::run() {
 
   exit(1);
 }
-
+void Viewer::loop() {
+  mtx_update.lock();
+  transformMatrix = poseToMatrix(poses);
+  transformMatrix = transformMatrix.transpose(1, 2);
+  transformMatrix = transformMatrix.contiguous().to(torch::kCPU);
+  mtx_update.unlock();
+}
 
 namespace py = pybind11;
 
@@ -309,5 +303,6 @@ PYBIND11_MODULE(dpviewerx, m) {
                   const torch::Tensor,
                   const torch::Tensor>())
     .def("update_image", &Viewer::update_image)
+    .def("loop", &Viewer::loop)
     .def("join", &Viewer::join);
 }
