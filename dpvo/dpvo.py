@@ -224,7 +224,7 @@ class DPVO:
 
     def remove_factors(self, m, store: bool):
         assert self.pg.ii.numel() == self.pg.weight.shape[1]
-        if store:
+        if store:#如果store为True，则将要删除的边存储到inactive edge中
             self.pg.ii_inac = torch.cat((self.pg.ii_inac, self.pg.ii[m]))
             self.pg.jj_inac = torch.cat((self.pg.jj_inac, self.pg.jj[m]))
             self.pg.kk_inac = torch.cat((self.pg.kk_inac, self.pg.kk[m]))
@@ -280,7 +280,7 @@ class DPVO:
             self.pg.delta[t1] = (t0, dP)
 
             to_remove = (self.pg.ii == k) | (self.pg.jj == k)
-            self.remove_factors(to_remove, store=False)
+            self.remove_factors(to_remove, store=False)#此处是不会存的，因为运动不够，不是关键帧
 
             self.pg.kk[self.pg.ii > k] -= self.M
             self.pg.ii[self.pg.ii > k] -= 1
@@ -309,7 +309,7 @@ class DPVO:
             # ...unless they are being used for loop closure
             lc_edges = ((self.pg.jj - self.pg.ii) > 30) & (self.pg.jj > (self.n - self.cfg.OPTIMIZATION_WINDOW))
             to_remove = to_remove & ~lc_edges
-        self.remove_factors(to_remove, store=True)
+        self.remove_factors(to_remove, store=True) #此处则是要存的，因为是关键帧，只是滑动出了窗口
 
     # 全局的BA优化
     def __run_global_BA(self):
@@ -321,12 +321,14 @@ class DPVO:
         full_jj = torch.cat((self.pg.jj_inac, self.pg.jj))
         full_kk = torch.cat((self.pg.kk_inac, self.pg.kk))
 
-        self.pg.normalize()
-        lmbda = torch.as_tensor([1e-4], device="cuda")
+        self.pg.normalize()#! 归一化,目的是？
+        lmbda = torch.as_tensor([1e-4], device="cuda") #给定值，不像droid那样需要计算
         t0 = self.pg.ii.min().item()
+        # 似乎只是加入了全局的边，和targer weight等信息，然后进行全局的BA优化，并无太大区别？
+        # 主要区别应该就是前面用的eff_impl=False，这里用的是True
         fastba.BA(self.poses, self.patches, self.intrinsics,
             full_target, full_weight, lmbda, full_ii, full_jj, full_kk, t0, self.n, M=self.M, iterations=2, eff_impl=True)
-        self.ran_global_ba[self.n] = True
+        self.ran_global_ba[self.n] = True #标记当前帧已经运行过全局BA优化
 
     def update(self):
         with Timer("other", enabled=self.enable_timing):

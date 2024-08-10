@@ -83,11 +83,12 @@ class PatchGraph:
 
     def normalize(self):
         """ normalize depth and poses """
-        s = self.patches_[:self.n,:,2].mean()
-        self.patches_[:self.n,:,2] /= s
-        self.poses_[:self.n,:3] *= s
-        for t, (t0, dP) in self.delta.items():
+        s = self.patches_[:self.n,:,2].mean()#获取到当前帧的所有深度的均值
+        self.patches_[:self.n,:,2] /= s #深度除均值进行归一化
+        self.poses_[:self.n,:3] *= s #位姿乘均值进行归一化
+        for t, (t0, dP) in self.delta.items(): #对于所有的removed frames也进行归一化
             self.delta[t] = (t0, dP.scale(s))
+        # 此时的pose应该是相对于第一帧的位姿（所谓的第一帧是poses_[[0]]）
         self.poses_[:self.n] = (SE3(self.poses_[:self.n]) * SE3(self.poses_[[0]]).inv()).data
 
         points = pops.point_cloud(SE3(self.poses), self.patches[:, :self.m], self.intrinsics, self.ix[:self.m])
