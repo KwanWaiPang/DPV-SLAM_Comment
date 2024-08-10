@@ -228,7 +228,7 @@ __global__ void patch_retr_kernel(
   }
 }
 
-
+// 重投影获取残差以及hessian矩阵
 __global__ void reprojection_residuals_and_hessian(
     const torch::PackedTensorAccessor32<float,2,torch::RestrictPtrTraits> poses,
     const torch::PackedTensorAccessor32<float,4,torch::RestrictPtrTraits> patches,
@@ -465,10 +465,12 @@ std::vector<torch::Tensor> cuda_ba(
   weight = weight.view({-1, 2});
 
   const int num = ii.size(0);
-  torch::Tensor B = torch::empty({6*N, 6*N}, mdtype);
+  // 下面应该就是hessian矩阵
+  torch::Tensor B = torch::empty({6*N, 6*N}, mdtype);//初始化的H矩阵
   torch::Tensor E = torch::empty({0, 0}, mdtype);
   torch::Tensor C = torch::empty({M}, mdtype);
 
+  // uv应该就是获得的每个patch的速度
   torch::Tensor v = torch::empty({6*N}, mdtype);
   torch::Tensor u = torch::empty({1*M}, mdtype);
 
@@ -477,7 +479,7 @@ std::vector<torch::Tensor> cuda_ba(
   auto blockE = std::make_unique<EfficentE>();
 
   if (eff_impl)
-    blockE = std::make_unique<EfficentE>(ii, jj, kx, PPF, t0);
+    blockE = std::make_unique<EfficentE>(ii, jj, kx, PPF, t0);//这个的目的应该是定义为稀疏的矩阵，这样可以减少计算量
   else
     E = torch::empty({6*N, 1*M}, mdtype);
 
@@ -494,6 +496,7 @@ std::vector<torch::Tensor> cuda_ba(
     v = v.view({6*N});
     u = u.view({1*M});
 
+    // 重投影获取残差以及hessian矩阵
     reprojection_residuals_and_hessian<<<NUM_BLOCKS(ii.size(0)), NUM_THREADS>>>(
       poses.packed_accessor32<float,2,torch::RestrictPtrTraits>(),
       patches.packed_accessor32<float,4,torch::RestrictPtrTraits>(),
@@ -605,6 +608,7 @@ torch::Tensor cuda_reproject(
 
   torch::Tensor coords = torch::empty({N, 2, P, P}, opts);
 
+  // 只做了一个重投影的操作，并没有考虑delta
   reproject<<<NUM_BLOCKS(N), NUM_THREADS>>>(
     poses.packed_accessor32<float,2,torch::RestrictPtrTraits>(),
     patches.packed_accessor32<float,4,torch::RestrictPtrTraits>(),
