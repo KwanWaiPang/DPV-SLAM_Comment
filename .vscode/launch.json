@@ -16,6 +16,7 @@
             "args":[
                 "--imagedir=movies/IMG_0492.MOV",
                 "--calib=calib/iphone.txt",
+                "--name=debug_test",
                 // "--viz",
                 "--plot",
                 "--save_ply",

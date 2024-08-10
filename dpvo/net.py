@@ -172,7 +172,7 @@ class CorrBlock:
             corrs += [ altcorr.corr(self.gmap, self.pyramid[i], coords / self.levels[i], ii, jj, self.radius, self.dropout) ]
         return torch.stack(corrs, -1).view(1, len(ii), -1)
 
-
+# 看似跟原本的dpvo网络结构差不多
 class VONet(nn.Module):
     def __init__(self, use_viewer=False):
         super(VONet, self).__init__()

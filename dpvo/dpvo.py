@@ -97,7 +97,7 @@ class DPVO:
                 if "update.lmbda" not in k:
                     new_state_dict[k.replace('module.', '')] = v
             
-            self.network = VONet()
+            self.network = VONet()#初始化VONet类
             self.network.load_state_dict(new_state_dict)
 
         else:
@@ -377,7 +377,7 @@ class DPVO:
     def __call__(self, tstamp, image, intrinsics):
         """ track new frame """
 
-        if self.cfg.CLASSIC_LOOP_CLOSURE:
+        if self.cfg.CLASSIC_LOOP_CLOSURE:#如果开启了经典的闭环检测
             self.long_term_lc(image, self.n)
 
         if (self.n+1) >= self.N:
@@ -385,6 +385,7 @@ class DPVO:
 
         if self.viewer is not None:
             self.viewer.update_image(image.contiguous())
+            self.viewer.loop()#这个应该是更新位置的？
 
         image = 2 * (image[None,None] / 255.0) - 0.5
         

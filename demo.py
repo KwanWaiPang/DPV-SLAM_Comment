@@ -38,17 +38,21 @@ def run(cfg, network, imagedir, calib, stride=1, skip=0, viz=False, timeit=False
         (t, image, intrinsics) = queue.get()
         if t < 0: break
 
+         # 将图像数据从 NumPy 数组转换为 PyTorch 张量，并用permute（）改变维度顺序（从 HWC 到 CHW）。
         image = torch.from_numpy(image).permute(2,0,1).cuda()
+
+        #将内参数据从 NumPy 数组转换为 PyTorch 张量。
         intrinsics = torch.from_numpy(intrinsics).cuda()
 
         if slam is None:
             _, H, W = image.shape
-            slam = DPVO(cfg, network, ht=H, wd=W, viz=viz)
+            slam = DPVO(cfg, network, ht=H, wd=W, viz=viz)#初始化DPVO类
 
         with Timer("SLAM", enabled=timeit):
-            slam(t, image, intrinsics)
+            slam(t, image, intrinsics)#调用DPVO类中的__call__方法
 
-    reader.join()
+    reader.join()#等待子进程结束
+    print('finished the DPV-SLAM!!!')
 
     points = slam.pg.points_.cpu().numpy()[:slam.m]
     colors = slam.pg.colors_.view(-1, 3).cpu().numpy()[:slam.m]
@@ -57,17 +61,18 @@ def run(cfg, network, imagedir, calib, stride=1, skip=0, viz=False, timeit=False
 
 
 if __name__ == '__main__':
+    # 首先添加一系列的参数
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--network', type=str, default='dpvo.pth')
-    parser.add_argument('--imagedir', type=str)
-    parser.add_argument('--calib', type=str)
+    parser.add_argument('--network', type=str, default='dpvo.pth') #注意权重文件的路径
+    parser.add_argument('--imagedir', type=str) #数据集路径
+    parser.add_argument('--calib', type=str) #相机内参
     parser.add_argument('--name', type=str, help='name your run', default='result')
     parser.add_argument('--stride', type=int, default=2)
     parser.add_argument('--skip', type=int, default=0)
     parser.add_argument('--config', default="config/default.yaml")
     parser.add_argument('--timeit', action='store_true')
-    parser.add_argument('--viz', action="store_true")
+    parser.add_argument('--viz', action="store_true") #是否可视化
     parser.add_argument('--plot', action="store_true")
     parser.add_argument('--opts', nargs='+', default=[])
     parser.add_argument('--save_ply', action="store_true")
@@ -79,10 +84,15 @@ if __name__ == '__main__':
     cfg.merge_from_list(args.opts) #调用的其实是opts参数
 
     print("Running with config...")
-    print(cfg)
+    print(cfg) #将所有的参数打印出来
 
+    # 运行SLAM
     (poses, tstamps), (points, colors, calib) = run(cfg, args.network, args.imagedir, args.calib, args.stride, args.skip, args.viz, args.timeit)
+
+    # 将poses转换为PoseTrajectory3D
     trajectory = PoseTrajectory3D(positions_xyz=poses[:,:3], orientations_quat_wxyz=poses[:, [6, 3, 4, 5]], timestamps=tstamps)
+
+    print("Saving the result...")
 
     if args.save_ply:
         save_ply(args.name, points, colors)
