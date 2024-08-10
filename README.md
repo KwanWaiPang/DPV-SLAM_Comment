@@ -95,4 +95,5 @@ python demo.py \
     --opts LOOP_CLOSURE True
 ~~~
 
-测试效果请见B站链接<sup>[1](https://www.bilibili.com/video/BV1n9Yee6Eh8/), [2](https://www.bilibili.com/video/BV1cXYeeGEeh/)</sup>.感觉可视化效果有待改进吧
+* 测试效果请见B站链接<sup>[1](https://www.bilibili.com/video/BV1n9Yee6Eh8/), [2](https://www.bilibili.com/video/BV1cXYeeGEeh/)</sup>.感觉可视化效果有待改进吧
+* 提供了debug的[脚本](.vscode/launch.json)
