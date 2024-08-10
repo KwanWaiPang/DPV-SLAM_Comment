@@ -76,7 +76,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     cfg.merge_from_file(args.config)
-    cfg.merge_from_list(args.opts)
+    cfg.merge_from_list(args.opts) #调用的其实是opts参数
 
     print("Running with config...")
     print(cfg)

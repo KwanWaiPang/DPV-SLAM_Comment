@@ -16,12 +16,14 @@
             "args":[
                 "--imagedir=movies/IMG_0492.MOV",
                 "--calib=calib/iphone.txt",
-                "--viz",
+                // "--viz",
                 "--plot",
                 "--save_ply",
                 "--save_trajectory",
                 "--save_colmap",
-                // "--opts LOOP_CLOSURE True",            
+                "--opts", //后面添加的为opts列表参数
+                "LOOP_CLOSURE", "True", //  DPVO with a SLAM backend  
+                "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
             ]
 
         }
