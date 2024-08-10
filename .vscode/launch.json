@@ -17,14 +17,14 @@
                 "--imagedir=movies/IMG_0492.MOV",
                 "--calib=calib/iphone.txt",
                 "--name=debug_test",
-                // "--viz",
+                // "--viz",//服务器debug时不要开启
                 "--plot",
                 "--save_ply",
                 "--save_trajectory",
                 "--save_colmap",
                 "--opts", //后面添加的为opts列表参数
                 "LOOP_CLOSURE", "True", //  DPVO with a SLAM backend  
-                "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
+                // "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
             ]
 
         }

@@ -200,7 +200,8 @@ def residual(Ginv, input_poses, dSloop, ii, jj, jacobian=False):
     return resid, J, (J_Ginv_i, J_Ginv_j, iii, jjj)
 
 def run_DPVO_PGO(pred_poses, loop_poses, loop_ii, loop_jj, queue):
-    final_est = perform_updates(pred_poses, loop_poses, loop_ii, loop_jj, iters=30)
+    # 根据回环进行更新的操作
+    final_est = perform_updates(pred_poses, loop_poses, loop_ii, loop_jj, iters=30)#返回的是最终的位姿
 
     safe_i = loop_ii.max().item() + 1
     aa = SE3_to_Sim3(pred_poses.cpu())
@@ -218,7 +219,7 @@ def perform_updates(input_poses, dSloop, ii_loop, jj_loop, iters, ep=0.0, lmbda=
     else:
         freen = -1
 
-    Ginv = SE3_to_Sim3(input_poses).Inv().Log()
+    Ginv = SE3_to_Sim3(input_poses).Inv().Log() #这是输入的位姿的逆的对数形式
 
     residual_history = []
 
@@ -226,9 +227,11 @@ def perform_updates(input_poses, dSloop, ii_loop, jj_loop, iters, ep=0.0, lmbda=
         resid, (J_Ginv_i, J_Ginv_j, iii, jjj) = residual(Ginv, input_poses, dSloop, ii_loop, jj_loop, jacobian=True)
         residual_history.append(resid.square().mean().item())
         # print("#Residual", residual_history[-1])
+
+        # delta_pose为回环检测的位姿更新量
         delta_pose, = cuda_ba.solve_system(J_Ginv_i, J_Ginv_j, iii, jjj, resid, ep, lmbda, freen)
         assert Ginv.shape == delta_pose.shape
-        Ginv_tmp = Ginv + delta_pose
+        Ginv_tmp = Ginv + delta_pose #获取更新后的位姿
 
         new_resid = residual(Ginv_tmp, input_poses, dSloop, ii_loop, jj_loop)
         if new_resid.square().mean() < residual_history[-1]:

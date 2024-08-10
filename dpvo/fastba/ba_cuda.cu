@@ -375,7 +375,7 @@ __global__ void reprojection_residuals_and_hessian(
   }
 }
 
-
+// 进行重投影
 __global__ void reproject(
     const torch::PackedTensorAccessor32<float,2,torch::RestrictPtrTraits> poses,
     const torch::PackedTensorAccessor32<float,4,torch::RestrictPtrTraits> patches,
@@ -398,7 +398,7 @@ __global__ void reproject(
   GPU_1D_KERNEL_LOOP(n, ii.size(0)) {
     int ix = ii[n];
     int jx = jj[n];
-    int kx = kk[n];
+    int kx = kk[n];//kx为k个patch的索引
 
     float ti[3] = { poses[ix][0], poses[ix][1], poses[ix][2] };
     float tj[3] = { poses[jx][0], poses[jx][1], poses[jx][2] };
@@ -409,16 +409,18 @@ __global__ void reproject(
     relSE3(ti, qi, tj, qj, tij, qij);
 
     float Xi[4], Xj[4];
+    // 索引patches的长宽
     for (int i=0; i<patches.size(2); i++) {
       for (int j=0; j<patches.size(3); j++) {
         
-        Xi[0] = (patches[kx][0][i][j] - cx) / fx;
-        Xi[1] = (patches[kx][1][i][j] - cy) / fy;
+        Xi[0] = (patches[kx][0][i][j] - cx) / fx;//位置x
+        Xi[1] = (patches[kx][1][i][j] - cy) / fy;//位置y
         Xi[2] = 1.0;
         Xi[3] = patches[kx][2][i][j];
 
-        actSE3(tij, qij, Xi, Xj);
+        actSE3(tij, qij, Xi, Xj);//获取相对变换的坐标位置
 
+        // 进行重投影获得坐标
         coords[n][0][i][j] = fx * (Xj[0] / Xj[2]) + cx;
         coords[n][1][i][j] = fy * (Xj[1] / Xj[2]) + cy;
         // coords[n][2][i][j] = 1.0 / Xj[2];
@@ -595,7 +597,7 @@ torch::Tensor cuda_reproject(
   const int P = patches.size(3); // patch size
 
   poses = poses.view({-1, 7});
-  patches = patches.view({-1,3,P,P});
+  patches = patches.view({-1,3,P,P});//所有的patch进行展开
   intrinsics = intrinsics.view({-1, 4});
 
   auto opts = torch::TensorOptions()

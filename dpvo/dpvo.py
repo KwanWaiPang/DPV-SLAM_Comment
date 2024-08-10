@@ -83,7 +83,7 @@ class DPVO:
     def load_long_term_loop_closure(self):
         try:
             from .loop_closure.long_term import LongTermLoopClosure
-            self.long_term_lc = LongTermLoopClosure(self.cfg, self.pg)
+            self.long_term_lc = LongTermLoopClosure(self.cfg, self.pg)#初始化LongTermLoopClosure类
         except ModuleNotFoundError as e:
             self.cfg.CLASSIC_LOOP_CLOSURE = False
             print(f"WARNING: {e}")
@@ -360,6 +360,10 @@ class DPVO:
                     t0 = max(t0, 1)
                     fastba.BA(self.poses, self.patches, self.intrinsics, 
                         target, weight, lmbda, self.pg.ii, self.pg.jj, self.pg.kk, t0, self.n, M=self.M, iterations=2, eff_impl=False)
+                    # 下面代码用于观测fastba.reproject的使用
+                    current_patch=self.patches[:,self.pg.kk];#获取当前的所有patch
+                    result_reproject=fastba.reproject(self.poses, self.patches, self.intrinsics, self.pg.ii, self.pg.jj, self.pg.kk)
+                    gwp_TODO = 1;#此处用于debug
             except:
                 print("Warning BA failed...")
 
@@ -461,13 +465,13 @@ class DPVO:
         self.n += 1 #关键帧数加1（只有motion足够关键帧才+1）
         self.m += self.M #总的patch的数量
 
-        if self.cfg.LOOP_CLOSURE: #如果开启了闭环检测
+        if self.cfg.LOOP_CLOSURE: #如果开启了闭环检测（这应该是DPVO中实现的闭环检测）
             if self.n - self.last_global_ba >= self.cfg.GLOBAL_OPT_FREQ:
                 """ Add loop closure factors """
                 lii, ljj = self.pg.edges_loop() #获取闭环检测的边
                 if lii.numel() > 0:
                     self.last_global_ba = self.n
-                    self.append_factors(lii, ljj)
+                    self.append_factors(lii, ljj)#添加闭环检测的边
 
         # Add forward and backward factors （给patch graph添加边）
         self.append_factors(*self.__edges_forw())
@@ -485,5 +489,5 @@ class DPVO:
             self.keyframe()
 
         if self.cfg.CLASSIC_LOOP_CLOSURE:#如果开启了经典的闭环检测
-            self.long_term_lc.attempt_loop_closure(self.n)
+            self.long_term_lc.attempt_loop_closure(self.n)#尝试进行闭环检测
             self.long_term_lc.lc_callback()

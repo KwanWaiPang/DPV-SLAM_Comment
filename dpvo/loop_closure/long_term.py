@@ -263,5 +263,7 @@ class LongTermLoopClosure:
         torch.set_num_threads(1)
 
         self.lc_in_progress = True
+        print(f"detect the loop closure, and running PGO!!!")
+        # 检测到loop之后，将run_DPVO_PGO函数放入进程池中异步执行
         self.lc_process = self.lc_pool.apply_async(run_DPVO_PGO, (pred_poses.data, loop_poses.data, loop_ii, loop_jj, self.result_queue))
         return True
