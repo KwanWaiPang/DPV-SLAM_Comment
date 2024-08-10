@@ -63,6 +63,7 @@ class DPVO:
         self.imap_ = torch.zeros(self.pmem, self.M, DIM, **kwargs)
         self.gmap_ = torch.zeros(self.pmem, self.M, 128, self.P, self.P, **kwargs)
 
+        # 定义一个PatchGraph类的实例
         self.pg = PatchGraph(self.cfg, self.P, self.DIM, self.pmem, **kwargs)
 
         # classic backend
@@ -212,10 +213,11 @@ class DPVO:
         coords = pops.transform(SE3(self.poses), self.patches, self.intrinsics, ii, jj, kk)
         return coords.permute(0, 1, 4, 2, 3).contiguous()
 
+    # 原本的DPPVO的patch graph并没有用额外一个类来管理的，此处用一个类来管理patch graph
     def append_factors(self, ii, jj):
         self.pg.jj = torch.cat([self.pg.jj, jj])
-        self.pg.kk = torch.cat([self.pg.kk, ii])
-        self.pg.ii = torch.cat([self.pg.ii, self.ix[ii]])
+        self.pg.kk = torch.cat([self.pg.kk, ii])#插入的ii其实就是patch的索引，kk
+        self.pg.ii = torch.cat([self.pg.ii, self.ix[ii]]) #self.ix[ii]也就是self.ix[kk]才是ii的索引
 
         net = torch.zeros(1, len(ii), self.DIM, **self.kwargs)
         self.pg.net = torch.cat([self.pg.net, net], dim=1)
@@ -309,6 +311,7 @@ class DPVO:
             to_remove = to_remove & ~lc_edges
         self.remove_factors(to_remove, store=True)
 
+    # 全局的BA优化
     def __run_global_BA(self):
         """ Global bundle adjustment
          Includes both active and inactive edges """
@@ -327,10 +330,10 @@ class DPVO:
 
     def update(self):
         with Timer("other", enabled=self.enable_timing):
-            coords = self.reproject()
+            coords = self.reproject() #重投影
 
             with autocast(enabled=True):
-                corr = self.corr(coords)
+                corr = self.corr(coords) #计算相关性，获取当前帧与上一帧之间的特征匹配信息。
                 ctx = self.imap[:, self.pg.kk % (self.M * self.pmem)]
                 self.pg.net, (delta, weight, _) = \
                     self.network.update(self.pg.net, ctx, corr, None, self.pg.ii, self.pg.jj, self.pg.kk)
@@ -342,12 +345,15 @@ class DPVO:
         self.pg.target = target
         self.pg.weight = weight
 
+        # Bundle adjustment进行BA优化
         with Timer("BA", enabled=self.enable_timing):
             try:
+                #运行全局BA优化
                 # run global bundle adjustment if there exist long-range edges
                 if (self.pg.ii < self.n - self.cfg.REMOVAL_WINDOW - 1).any() and not self.ran_global_ba[self.n]:
+                    # 如果ii中有小于n-REMOVAL_WINDOW-1的值（就是有回环匹配了），且当前帧没有运行过全局BA优化，则运行全局BA优化
                     self.__run_global_BA()
-                else:
+                else:#运行局部BA优化
                     t0 = self.n - self.cfg.OPTIMIZATION_WINDOW if self.is_initialized else 1
                     t0 = max(t0, 1)
                     fastba.BA(self.poses, self.patches, self.intrinsics, 
@@ -429,13 +435,13 @@ class DPVO:
                 tvec_qvec = self.poses[self.n-1]
                 self.pg.poses_[self.n] = tvec_qvec
 
-        # TODO better depth initialization
+        # TODO better depth initialization（深度的初始化）
         patches[:,:,2] = torch.rand_like(patches[:,:,2,0,0,None,None])
-        if self.is_initialized:
+        if self.is_initialized:#如果已初始化，则使用过去几帧的深度中值进行深度初始化。
             s = torch.median(self.pg.patches_[self.n-3:self.n,:,2])
             patches[:,:,2] = s
 
-        self.pg.patches_[self.n] = patches
+        self.pg.patches_[self.n] = patches #放入新的patch
 
         ### update network attributes ###
         self.imap_[self.n % self.pmem] = imap.squeeze()
@@ -443,27 +449,29 @@ class DPVO:
         self.fmap1_[:, self.n % self.mem] = F.avg_pool2d(fmap[0], 1, 1)
         self.fmap2_[:, self.n % self.mem] = F.avg_pool2d(fmap[0], 4, 4)
 
-        self.counter += 1        
+        self.counter += 1 #计数器始终加1     
+        # 检查是否初始化，如果未初始化且运动探测值小于 2.0，则更新 self.delta 并返回。     
         if self.n > 0 and not self.is_initialized:
             if self.motion_probe() < 2.0:
                 self.pg.delta[self.counter - 1] = (self.counter - 2, Id[0])
                 return
 
-        self.n += 1
-        self.m += self.M
+        self.n += 1 #关键帧数加1（只有motion足够关键帧才+1）
+        self.m += self.M #总的patch的数量
 
-        if self.cfg.LOOP_CLOSURE:
+        if self.cfg.LOOP_CLOSURE: #如果开启了闭环检测
             if self.n - self.last_global_ba >= self.cfg.GLOBAL_OPT_FREQ:
                 """ Add loop closure factors """
-                lii, ljj = self.pg.edges_loop()
+                lii, ljj = self.pg.edges_loop() #获取闭环检测的边
                 if lii.numel() > 0:
                     self.last_global_ba = self.n
                     self.append_factors(lii, ljj)
 
-        # Add forward and backward factors
+        # Add forward and backward factors （给patch graph添加边）
         self.append_factors(*self.__edges_forw())
         self.append_factors(*self.__edges_back())
 
+        # 前8帧进行初始化
         if self.n == 8 and not self.is_initialized:
             self.is_initialized = True
 
@@ -474,6 +482,6 @@ class DPVO:
             self.update()
             self.keyframe()
 
-        if self.cfg.CLASSIC_LOOP_CLOSURE:
+        if self.cfg.CLASSIC_LOOP_CLOSURE:#如果开启了经典的闭环检测
             self.long_term_lc.attempt_loop_closure(self.n)
             self.long_term_lc.lc_callback()

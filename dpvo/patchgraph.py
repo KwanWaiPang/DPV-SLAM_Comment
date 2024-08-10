@@ -38,7 +38,7 @@ class PatchGraph:
         self.poses_[:,6] = 1.0
 
         # store relative poses for removed frames
-        self.delta = {}
+        self.delta = {} #存放着removed frames的相对位姿
 
         ### edge information ###
         self.net = torch.zeros(1, 0, DIM, **kwargs)
