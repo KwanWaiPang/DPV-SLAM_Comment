@@ -96,4 +96,13 @@ python demo.py \
 ~~~
 
 * 测试效果请见B站链接<sup>[1](https://www.bilibili.com/video/BV1n9Yee6Eh8/), [2](https://www.bilibili.com/video/BV1cXYeeGEeh/)</sup>.感觉可视化效果有待改进吧
+
+# Debug及代码阅读记录
 * 提供了debug的[脚本](.vscode/launch.json)
+* 运行时可视化pose轨迹：B站链接<sup>[1](https://www.bilibili.com/video/BV1WuYLeZERs/)</sup>
+* DPVO中有5种特征（前面3中是CNN产生的，后面3中是RNN中要用的）:
+  * image对应的fmap（matching feature）
+  * patch特征图gmap（matching feature）
+  * patch对应的imap （context feature）
+  * net 是RNN迭代更新的hidden state
+  * corr是correlation feature，是由```image对应的fmap（matching feature）```和```patch特征图gmap（matching feature）```执行相关操作中产生的

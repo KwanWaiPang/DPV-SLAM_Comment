@@ -385,29 +385,34 @@ class DPVO:
 
         if self.viewer is not None:
             self.viewer.update_image(image.contiguous())
-            self.viewer.loop()#这个应该是更新位置的？
+            self.viewer.loop()#这个应该是更新位置的，使得相机pose可以可视化~
 
+        # 归一化图像，将像素值从 [0, 255] 映射到 [-0.5, 1.5] 之间。
         image = 2 * (image[None,None] / 255.0) - 0.5
         
-        with autocast(enabled=self.cfg.MIXED_PRECISION):
+        # 提取feature
+        # image对应的fmap（matching feature）、patch特征图gmap（matching feature）、patch对应的imap （context feature）
+        with autocast(enabled=self.cfg.MIXED_PRECISION):# 使用自动混合精度（autocast）加速计算。
             fmap, gmap, imap, patches, _, clr = \
                 self.network.patchify(image,
                     patches_per_image=self.cfg.PATCHES_PER_FRAME, 
                     centroid_sel_strat=self.cfg.CENTROID_SEL_STRAT, 
                     return_color=True)
 
-        ### update state attributes ###
+        ### update state attributes （状态属性的更新及保留） ###
         self.tlist.append(tstamp)
         self.pg.tstamps_[self.n] = self.counter
         self.pg.intrinsics_[self.n] = intrinsics / self.RES
 
-        # color info for visualization
+        # color info for visualization（可视化颜色信息）
         clr = (clr[0,:,[2,1,0]] + 0.5) * (255.0 / 2)
         self.pg.colors_[self.n] = clr.to(torch.uint8)
 
+         # 索引更新
         self.pg.index_[self.n + 1] = self.n + 1
-        self.pg.index_map_[self.n + 1] = self.m + self.M
+        self.pg.index_map_[self.n + 1] = self.m + self.M #地图索引其实就是patch的数量的索引？
 
+        # 运动模型和姿态估计
         if self.n > 1:
             if self.cfg.MOTION_MODEL == 'DAMPED_LINEAR':
                 P1 = SE3(self.pg.poses_[self.n-1])
@@ -420,7 +425,7 @@ class DPVO:
                 xi = self.cfg.MOTION_DAMPING * fac * (P1 * P2.inv()).log()
                 tvec_qvec = (SE3.exp(xi) * P1).data
                 self.pg.poses_[self.n] = tvec_qvec
-            else:
+            else:#否则的话，将当前的姿态设置为上一帧的姿态。
                 tvec_qvec = self.poses[self.n-1]
                 self.pg.poses_[self.n] = tvec_qvec
 

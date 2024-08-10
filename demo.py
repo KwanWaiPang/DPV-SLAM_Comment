@@ -52,7 +52,7 @@ def run(cfg, network, imagedir, calib, stride=1, skip=0, viz=False, timeit=False
             slam(t, image, intrinsics)#调用DPVO类中的__call__方法
 
     reader.join()#等待子进程结束
-    print('finished the DPV-SLAM!!!')
+    print("\033[41m finished the DPV-SLAM!!! \033[0m")
 
     points = slam.pg.points_.cpu().numpy()[:slam.m]
     colors = slam.pg.colors_.view(-1, 3).cpu().numpy()[:slam.m]
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     cfg.merge_from_file(args.config)
     cfg.merge_from_list(args.opts) #调用的其实是opts参数
 
-    print("Running with config...")
+    print("\033[42m Running with config...\033[0m ")
     print(cfg) #将所有的参数打印出来
 
     # 运行SLAM
