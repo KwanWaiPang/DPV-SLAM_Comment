@@ -181,7 +181,7 @@ std::vector<torch::Tensor> solve_system(torch::Tensor J_Ginv_i, torch::Tensor J_
 
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-  m.def("forward", &ba, "BA forward operator");
+  m.def("forward", &ba, "BA forward operator");//此处相比起原文多增加了M（所有patch的数量）和eff_impl两个参数
   m.def("neighbors", &neighbors, "temporal neighboor indicies");//这个应该是相关操作的时候用的
   m.def("reproject", &reproject, "temporal neighboor indicies");//跟原文一样此处没有调用
   m.def("solve_system", &solve_system, "temporal neighboor indicies");//这是增加的回环检测用的
