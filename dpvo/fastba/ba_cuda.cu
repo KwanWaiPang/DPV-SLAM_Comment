@@ -243,10 +243,10 @@ __global__ void reprojection_residuals_and_hessian(
     const torch::PackedTensorAccessor32<long,1,torch::RestrictPtrTraits> ku,
     torch::PackedTensorAccessor32<double,1,torch::RestrictPtrTraits> r_total,
     torch::PackedTensorAccessor32<mtype,3,torch::RestrictPtrTraits> E_lookup,
-    torch::PackedTensorAccessor32<mtype,2,torch::RestrictPtrTraits> B,
+    torch::PackedTensorAccessor32<mtype,2,torch::RestrictPtrTraits> B,//hessian矩阵
     torch::PackedTensorAccessor32<mtype,2,torch::RestrictPtrTraits> E,
     torch::PackedTensorAccessor32<mtype,1,torch::RestrictPtrTraits> C,
-    torch::PackedTensorAccessor32<mtype,1,torch::RestrictPtrTraits> v,
+    torch::PackedTensorAccessor32<mtype,1,torch::RestrictPtrTraits> v,//速度
     torch::PackedTensorAccessor32<mtype,1,torch::RestrictPtrTraits> u, const int t0, const int ppf)
 {
 
@@ -266,13 +266,14 @@ __global__ void reprojection_residuals_and_hessian(
     int k = ku[n]; // inverse indices
     int ix = ii[n];
     int jx = jj[n];
-    int kx = kk[n]; // actual
+    int kx = kk[n]; // actual（patch索引）
     int ijx, ijs;
     if (eff_impl){
       ijx = ij_xself[0][n];
       ijs = ij_xself[1][n];
     }
 
+  // 从poses中获取相机的位置和姿态  
     float ti[3] = { poses[ix][0], poses[ix][1], poses[ix][2] };
     float tj[3] = { poses[jx][0], poses[jx][1], poses[jx][2] };
     float qi[4] = { poses[ix][3], poses[ix][4], poses[ix][5], poses[ix][6] };
@@ -285,8 +286,8 @@ __global__ void reprojection_residuals_and_hessian(
     Xi[3] = patches[kx][2][1][1];
     
     float tij[3], qij[4];
-    relSE3(ti, qi, tj, qj, tij, qij);
-    actSE3(tij, qij, Xi, Xj);
+    relSE3(ti, qi, tj, qj, tij, qij);//相对变换
+    actSE3(tij, qij, Xi, Xj);//将patch从ix帧变换到jx帧
 
     const float X = Xj[0];
     const float Y = Xj[1];
@@ -325,7 +326,7 @@ __global__ void reprojection_residuals_and_hessian(
       } else {
 
         r = target[n][1] - y1;
-        w = mask * weight[n][1];
+        w = mask * weight[n][1];//权重
 
         Jz = fy * (tij[1] * d - tij[2] * (Y * d2));
         Jj = (float[6]){0, fy*W*d, fy*-Y*W*d2, fy*(-1-Y*Y*d2), fy*(X*Y*d2), fy*X*d};
@@ -464,15 +465,15 @@ std::vector<torch::Tensor> cuda_ba(
   target = target.view({-1, 2});
   weight = weight.view({-1, 2});
 
-  const int num = ii.size(0);
+  const int num = ii.size(0);//所有边的数量
   // 下面应该就是hessian矩阵
-  torch::Tensor B = torch::empty({6*N, 6*N}, mdtype);//初始化的H矩阵
+  torch::Tensor B = torch::empty({6*N, 6*N}, mdtype);//初始化的H矩阵N是帧数（）
   torch::Tensor E = torch::empty({0, 0}, mdtype);
   torch::Tensor C = torch::empty({M}, mdtype);
 
   // uv应该就是获得的每个patch的速度
-  torch::Tensor v = torch::empty({6*N}, mdtype);
-  torch::Tensor u = torch::empty({1*M}, mdtype);
+  torch::Tensor v = torch::empty({6*N}, mdtype);//速度
+  torch::Tensor u = torch::empty({1*M}, mdtype);//速度的权重
 
   torch::Tensor r_total = torch::empty({1}, torch::dtype(torch::kFloat64).device(torch::kCUDA));
 
@@ -481,7 +482,7 @@ std::vector<torch::Tensor> cuda_ba(
   if (eff_impl)
     blockE = std::make_unique<EfficentE>(ii, jj, kx, PPF, t0);//这个的目的应该是定义为稀疏的矩阵，这样可以减少计算量
   else
-    E = torch::empty({6*N, 1*M}, mdtype);
+    E = torch::empty({6*N, 1*M}, mdtype);//patch在每个帧上的
 
   for (int itr=0; itr < iterations; itr++) {
 
@@ -511,10 +512,10 @@ std::vector<torch::Tensor> cuda_ba(
       ku.packed_accessor32<long,1,torch::RestrictPtrTraits>(),
       r_total.packed_accessor32<double,1,torch::RestrictPtrTraits>(),
       blockE->E_lookup.packed_accessor32<mtype,3,torch::RestrictPtrTraits>(),
-      B.packed_accessor32<mtype,2,torch::RestrictPtrTraits>(),
+      B.packed_accessor32<mtype,2,torch::RestrictPtrTraits>(),//H矩阵
       E.packed_accessor32<mtype,2,torch::RestrictPtrTraits>(),
-      C.packed_accessor32<mtype,1,torch::RestrictPtrTraits>(),
-      v.packed_accessor32<mtype,1,torch::RestrictPtrTraits>(),
+      C.packed_accessor32<mtype,1,torch::RestrictPtrTraits>(),//所有的patch的
+      v.packed_accessor32<mtype,1,torch::RestrictPtrTraits>(),//速度
       u.packed_accessor32<mtype,1,torch::RestrictPtrTraits>(), t0, blockE->ppf);
 
     // std::cout << "Total residuals: " << r_total.item<double>() << std::endl;
@@ -550,7 +551,7 @@ std::vector<torch::Tensor> cuda_ba(
 
         S += I * (1e-4 * S + 1.0);
         torch::Tensor U = std::get<0>(at::linalg_cholesky_ex(S));
-        dX = torch::cholesky_solve(y, U);
+        dX = torch::cholesky_solve(y, U);//cholesky_solve求解pose增量
         torch::Tensor EtdX = blockE->computeEtv(M, dX);
         dZ = Qt * (u - EtdX);
 
