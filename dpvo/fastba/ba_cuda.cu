@@ -522,7 +522,7 @@ std::vector<torch::Tensor> cuda_ba(
     v = v.view({6*N, 1});
     u = u.view({1*M, 1});
 
-    torch::Tensor Q = 1.0 / (C + lmbda).view({1, M});
+    torch::Tensor Q = 1.0 / (C + lmbda).view({1, M});//c就是一个对角矩阵
 
     if (t1 - t0 == 0) {
 
@@ -546,10 +546,11 @@ std::vector<torch::Tensor> cuda_ba(
         torch::Tensor EQEt = blockE->computeEQEt(N, Q);
         torch::Tensor EQu = blockE->computeEv(N, Qt * u);
 
-        torch::Tensor S = B - EQEt;
-        torch::Tensor y = v - EQu;
+        torch::Tensor S = B - EQEt;//是A矩阵（对应1865的A）
+        torch::Tensor y = v - EQu;//就是1870的B
+        // 此时就是获得hg与vg
 
-        S += I * (1e-4 * S + 1.0);
+        S += I * (1e-4 * S + 1.0);//为了保证正定
         torch::Tensor U = std::get<0>(at::linalg_cholesky_ex(S));
         dX = torch::cholesky_solve(y, U);//cholesky_solve求解pose增量
         torch::Tensor EtdX = blockE->computeEtv(M, dX);
@@ -560,12 +561,13 @@ std::vector<torch::Tensor> cuda_ba(
         torch::Tensor EQ = E * Q;
         torch::Tensor Et = torch::transpose(E, 0, 1);
 
-        torch::Tensor S = B - torch::matmul(EQ, Et);
-        torch::Tensor y = v - torch::matmul(EQ,  u);
+        torch::Tensor S = B - torch::matmul(EQ, Et);//A矩阵
+        torch::Tensor y = v - torch::matmul(EQ,  u);//B矩阵
 
-        S += I * (1e-4 * S + 1.0);
+        //求解Ax=B的问题
+        S += I * (1e-4 * S + 1.0);//为A矩阵
         torch::Tensor U = std::get<0>(at::linalg_cholesky_ex(S));
-        dX = torch::cholesky_solve(y, U);
+        dX = torch::cholesky_solve(y, U);//输入的y为B，U为L
         dZ = Qt * (u - torch::matmul(Et, dX));
 
       }
