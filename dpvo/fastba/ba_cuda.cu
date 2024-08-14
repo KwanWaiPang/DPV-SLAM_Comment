@@ -561,8 +561,9 @@ std::vector<torch::Tensor> cuda_ba(
         torch::Tensor EQ = E * Q;
         torch::Tensor Et = torch::transpose(E, 0, 1);
 
-        torch::Tensor S = B - torch::matmul(EQ, Et);//A矩阵
-        torch::Tensor y = v - torch::matmul(EQ,  u);//B矩阵
+        torch::Tensor S = B - torch::matmul(EQ, Et);//A矩阵,Hgg
+        torch::Tensor y = v - torch::matmul(EQ,  u);//B矩阵,vgg
+        // 此时就是获得hg与vg
 
         //求解Ax=B的问题
         S += I * (1e-4 * S + 1.0);//为A矩阵
