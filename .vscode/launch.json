@@ -29,6 +29,54 @@
                 // "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
             ]
 
+        },
+
+        {
+            "name": "dpv-slam-tum",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "evaluate_tum.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "2"
+            },
+            "args":[
+                "--tumdir=/home/gwp/DBA-Fusion/dataset/",
+                // "--viz",//服务器debug时不要开启
+                // "--plot",
+                // "--save_ply",
+                "--save_trajectory",
+                // "--save_colmap",
+                // "--opts", //后面添加的为opts列表参数
+                // "LOOP_CLOSURE", "True", //  DPVO with a SLAM backend  
+                // "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
+            ]
+
+        },
+
+        {
+            "name": "EuRoC",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "evaluate_euroc.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "2"
+            },
+            "args":[
+                "--eurocdir=/home/gwp/Deep-EIO/",
+                "--trials=1",
+                "--network=/home/gwp/DPVO/dpvo.pth",
+                // "--viz",//服务器debug时不要开启
+                // "--plot",
+                // "--save_ply",
+                "--save_trajectory",
+                // "--save_colmap",
+                // "--opts", //后面添加的为opts列表参数
+                // "LOOP_CLOSURE", "True", //  DPVO with a SLAM backend  
+                // "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
+            ]
+
         }
     ]
 }

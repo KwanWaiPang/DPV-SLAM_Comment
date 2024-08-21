@@ -82,21 +82,22 @@ if __name__ == '__main__':
 
     euroc_scenes = [
         "MH_01_easy",
-        "MH_02_easy",
-        "MH_03_medium",
-        "MH_04_difficult",
-        "MH_05_difficult",
-        "V1_01_easy",
-        "V1_02_medium",
-        "V1_03_difficult",
-        "V2_01_easy",
-        "V2_02_medium",
-        "V2_03_difficult",
+        # "MH_02_easy",
+        # "MH_03_medium",
+        # "MH_04_difficult",
+        # "MH_05_difficult",
+        # "V1_01_easy",
+        # "V1_02_medium",
+        # "V1_03_difficult",
+        # "V2_01_easy",
+        # "V2_02_medium",
+        # "V2_03_difficult",
     ]
 
     results = {}
     for scene in euroc_scenes:
-        imagedir = os.path.join(args.eurocdir, scene, "mav0/cam0/data")
+        # imagedir = os.path.join(args.eurocdir, scene, "mav0/cam0/data")
+        imagedir = os.path.join(args.eurocdir, "dataset", "mav0/cam0/data")
         groundtruth = "datasets/euroc_groundtruth/{}.txt".format(scene) 
 
         scene_results = []
@@ -129,9 +130,11 @@ if __name__ == '__main__':
                 file_interface.write_tum_trajectory_file(f"saved_trajectories/Euroc_{scene}_Trial{i+1:02d}.txt", traj_est)
 
             scene_results.append(ate_score)
+            print(f"finish the run of scene {scene} and result is \n{result}")
+            gwp_debug=1;
 
         results[scene] = np.median(scene_results)
-        print(scene, sorted(scene_results))
+        print(scene, sorted(scene_results))#把结果打印出来
 
     xs = []
     for scene in results:

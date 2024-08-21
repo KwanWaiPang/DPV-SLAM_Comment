@@ -125,7 +125,7 @@ if __name__ == '__main__':
     ]
 
     results = {}
-    for scene in tum_scenes:
+    for scene in tum_scenes:#遍历所有的场景
         scene_dir = args.tumdir / f"{scene}"
         groundtruth = scene_dir / "groundtruth.txt"
         traj_ref = file_interface.read_tum_trajectory_file(groundtruth)
