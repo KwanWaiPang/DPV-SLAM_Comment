@@ -31,7 +31,7 @@ def run(cfg, network, imagedir, calib, stride=1, viz=False, show_img=False):
     slam = None
 
     queue = Queue(maxsize=8)
-    reader = Process(target=image_stream, args=(queue, imagedir, calib, stride, 0))
+    reader = Process(target=image_stream, args=(queue, imagedir, calib, stride, 0))#多线程调用image_stream函数
     reader.start()
 
     while 1:

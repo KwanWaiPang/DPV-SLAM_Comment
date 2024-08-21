@@ -46,7 +46,7 @@ class DPVO:
         wd = wd // RES
 
         # dummy image for visualization
-        self.image_ = torch.zeros(self.ht, self.wd, 3, dtype=torch.uint8, device="cpu")
+        self.image_ = torch.zeros(self.ht, self.wd, 3, dtype=torch.uint8, device="cpu")#原图大小！
 
         ### network attributes ###
         if self.cfg.MIXED_PRECISION:

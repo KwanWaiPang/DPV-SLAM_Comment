@@ -36,7 +36,7 @@ def image_stream(queue, imagedir, calib, stride, skip=0):
         h, w, _ = image.shape
         image = image[:h-h%16, :w-w%16]
 
-        queue.put((t, image, intrinsics))
+        queue.put((t, image, intrinsics))#t只是一个计数器，用来记录当前是第几帧
 
     queue.put((-1, image, intrinsics))
 
