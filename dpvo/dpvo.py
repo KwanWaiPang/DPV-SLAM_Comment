@@ -414,7 +414,7 @@ class DPVO:
         ### update state attributes （状态属性的更新及保留） ###
         # print(f"tracking frame {self.n} at {tstamp}")
         self.tlist.append(tstamp)#只是数字？
-        self.pg.tstamps_[self.n] = self.counter
+        self.pg.tstamps_[self.n] = self.counter#也只是数字
         self.pg.intrinsics_[self.n] = intrinsics / self.RES
 
         # color info for visualization（可视化颜色信息）
