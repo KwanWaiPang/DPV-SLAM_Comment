@@ -57,6 +57,7 @@ def run(cfg, network, scene_dir, sequence, stride=1, viz=False, show_img=False):
     slam = None
 
     queue = Queue(maxsize=8)
+    # 通过函数来生成tum的图像数据
     reader = Process(target=tum_image_stream, args=(queue, scene_dir, sequence, stride, 0))
     reader.start()
 

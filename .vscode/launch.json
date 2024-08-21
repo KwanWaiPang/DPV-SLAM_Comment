@@ -14,16 +14,18 @@
                 "CUDA_VISIBLE_DEVICES": "2"
             },
             "args":[
-                "--imagedir=movies/IMG_0492.MOV",
-                "--calib=calib/iphone.txt",
-                "--name=debug_test",
+                // "--imagedir=movies/IMG_0492.MOV",
+                // "--calib=calib/iphone.txt",
+                "--imagedir=/home/gwp/DBA-Fusion/dataset/dataset-corridor1_512_16/mav0/cam0/data",
+                "--calib=calib/tumvi.txt",
+                "--name=result_corridor1",
                 // "--viz",//服务器debug时不要开启
-                "--plot",
-                "--save_ply",
+                // "--plot",
+                // "--save_ply",
                 "--save_trajectory",
-                "--save_colmap",
-                "--opts", //后面添加的为opts列表参数
-                "LOOP_CLOSURE", "True", //  DPVO with a SLAM backend  
+                // "--save_colmap",
+                // "--opts", //后面添加的为opts列表参数
+                // "LOOP_CLOSURE", "True", //  DPVO with a SLAM backend  
                 // "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
             ]
 

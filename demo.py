@@ -49,6 +49,7 @@ def run(cfg, network, imagedir, calib, stride=1, skip=0, viz=False, timeit=False
             slam = DPVO(cfg, network, ht=H, wd=W, viz=viz)#初始化DPVO类
 
         with Timer("SLAM", enabled=timeit):
+            print(f"Processing frame {t} ")
             slam(t, image, intrinsics)#调用DPVO类中的__call__方法
 
     reader.join()#等待子进程结束

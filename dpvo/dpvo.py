@@ -412,7 +412,7 @@ class DPVO:
                     return_color=True)
 
         ### update state attributes （状态属性的更新及保留） ###
-        self.tlist.append(tstamp)
+        self.tlist.append(tstamp)#只是数字？
         self.pg.tstamps_[self.n] = self.counter
         self.pg.intrinsics_[self.n] = intrinsics / self.RES
 
