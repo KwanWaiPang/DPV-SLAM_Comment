@@ -270,7 +270,9 @@ class DPVO:
         i = self.n - self.cfg.KEYFRAME_INDEX - 1
         j = self.n - self.cfg.KEYFRAME_INDEX + 1
         m = self.motionmag(i, j) + self.motionmag(j, i)
- 
+
+        print(f'the mition between {i} and {j} is {m/2}')
+
         if m / 2 < self.cfg.KEYFRAME_THRESH:
             k = self.n - self.cfg.KEYFRAME_INDEX
             t0 = self.pg.tstamps_[k-1]
@@ -331,6 +333,7 @@ class DPVO:
         self.ran_global_ba[self.n] = True #标记当前帧已经运行过全局BA优化
 
     def update(self):
+        print(f'current frame: {self.n}, graph edge size: {self.pg.kk.shape}')
         with Timer("other", enabled=self.enable_timing):
             coords = self.reproject() #重投影
 
@@ -360,13 +363,14 @@ class DPVO:
                     t0 = max(t0, 1)
                     fastba.BA(self.poses, self.patches, self.intrinsics, 
                         target, weight, lmbda, self.pg.ii, self.pg.jj, self.pg.kk, t0, self.n, M=self.M, iterations=2, eff_impl=False)
-                    # 下面代码用于观测fastba.reproject的使用
-                    current_patch=self.patches[:,self.pg.kk];#获取当前的所有patch
-                    result_reproject=fastba.reproject(self.poses, self.patches, self.intrinsics, self.pg.ii, self.pg.jj, self.pg.kk)
-                    gwp_TODO = 1;#此处用于debug
+                    # # 下面代码用于观测fastba.reproject的使用
+                    # current_patch=self.patches[:,self.pg.kk];#获取当前的所有patch
+                    # result_reproject=fastba.reproject(self.poses, self.patches, self.intrinsics, self.pg.ii, self.pg.jj, self.pg.kk)
+                    # gwp_TODO = 1;#此处用于debug
             except:
                 print("Warning BA failed...")
 
+            print(f'after BA: frame {self.n-1} pose {self.poses[0][self.n-1]}')
             points = pops.point_cloud(SE3(self.poses), self.patches[:, :self.m], self.intrinsics, self.ix[:self.m])
             points = (points[...,1,1,:3] / points[...,1,1,3:]).reshape(-1, 3)
             self.pg.points_[:len(points)] = points[:]
