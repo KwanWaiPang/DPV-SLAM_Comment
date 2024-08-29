@@ -105,12 +105,15 @@ if __name__ == '__main__':
             traj_est, timestamps = run(cfg, args.network, imagedir, "calib/euroc.txt", args.stride, args.viz, args.show_img)
 
             images_list = sorted(glob.glob(os.path.join(imagedir, "*.png")))[::args.stride]
-            tstamps = [float(x.split('/')[-1][:-4]) for x in images_list]
+            tstamps = [float(x.split('/')[-1][:-4]) for x in images_list]#获取时间戳
 
             traj_est = PoseTrajectory3D(
                 positions_xyz=traj_est[:,:3],
                 orientations_quat_wxyz=traj_est[:, [6, 3, 4, 5]],
                 timestamps=np.array(tstamps))
+            
+            #将traj_est保存到txt文件中
+            file_interface.write_tum_trajectory_file("saved_trajectories/MH_01_easy.txt", traj_est)
 
             traj_ref = file_interface.read_tum_trajectory_file(groundtruth)
             traj_ref, traj_est = sync.associate_trajectories(traj_ref, traj_est)
