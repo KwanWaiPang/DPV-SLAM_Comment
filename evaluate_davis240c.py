@@ -116,7 +116,7 @@ if __name__ == '__main__':
                 timestamps=np.array(tstamps))
             
             #将traj_est保存到txt文件中
-            file_interface.write_tum_trajectory_file(f"saved_trajectories/davis240c_{scene}.txt", traj_est)
+            # file_interface.write_tum_trajectory_file(f"saved_trajectories/davis240c_{scene}.txt", traj_est)
 
             traj_ref = file_interface.read_tum_trajectory_file(groundtruth)
             gtlentraj = traj_ref.get_infos()["path length (m)"]#获取轨迹长度
@@ -143,8 +143,9 @@ if __name__ == '__main__':
                                 pdfname, align=True, correct_scale=True)
 
             if args.save_trajectory:
-                Path("saved_trajectories").mkdir(exist_ok=True)
-                file_interface.write_tum_trajectory_file(f"saved_trajectories/Euroc_{scene}_Trial{i+1:02d}.txt", traj_est)
+                # Path("saved_trajectories").mkdir(exist_ok=True)
+                file_interface.write_tum_trajectory_file(f"saved_trajectories/davis240c_{scene}_ATEm_{ate_score:.03f}_MPE_{MPE:.02f}.txt", traj_est)
+                # file_interface.write_tum_trajectory_file(f"saved_trajectories/Euroc_{scene}_Trial{i+1:02d}.txt", traj_est)
 
             scene_results.append(MPE)
             print(f"finish the run of scene {scene} and result is \n{res_str}")

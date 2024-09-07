@@ -93,6 +93,7 @@
                 "--trials=1",
                 "--network=/home/gwp/DPVO/dpvo.pth", 
                 "--plot",  
+                "--save_trajectory",
                 // "--stride=1",
             ]
 
