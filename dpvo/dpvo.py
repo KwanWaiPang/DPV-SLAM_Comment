@@ -271,7 +271,7 @@ class DPVO:
         j = self.n - self.cfg.KEYFRAME_INDEX + 1
         m = self.motionmag(i, j) + self.motionmag(j, i)
 
-        print(f'the mition between {i} and {j} is {m/2}')
+        # print(f'the mition between {i} and {j} is {m/2}')
 
         if m / 2 < self.cfg.KEYFRAME_THRESH:
             k = self.n - self.cfg.KEYFRAME_INDEX
@@ -333,7 +333,7 @@ class DPVO:
         self.ran_global_ba[self.n] = True #标记当前帧已经运行过全局BA优化
 
     def update(self):
-        print(f'current frame: {self.n}, graph edge size: {self.pg.kk.shape}')
+        # print(f'current frame: {self.n}, graph edge size: {self.pg.kk.shape}')
         with Timer("other", enabled=self.enable_timing):
             coords = self.reproject() #重投影
 
@@ -370,7 +370,7 @@ class DPVO:
             except:
                 print("Warning BA failed...")
 
-            print(f'after BA: frame {self.n-1} pose {self.poses[0][self.n-1]}')
+            # print(f'after BA: frame {self.n-1} pose {self.poses[0][self.n-1]}')
             points = pops.point_cloud(SE3(self.poses), self.patches[:, :self.m], self.intrinsics, self.ix[:self.m])
             points = (points[...,1,1,:3] / points[...,1,1,3:]).reshape(-1, 3)
             self.pg.points_[:len(points)] = points[:]

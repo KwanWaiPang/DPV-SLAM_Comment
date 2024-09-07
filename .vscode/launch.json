@@ -77,6 +77,25 @@
                 // "CLASSIC_LOOP_CLOSURE", "True" //classical backend         
             ]
 
+        },
+
+        {
+            "name": "davis240c",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "evaluate_davis240c.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "3"
+            },
+            "args":[
+                "--inputdir=/media/lfl-data2/davis240c",
+                "--trials=1",
+                "--network=/home/gwp/DPVO/dpvo.pth", 
+                "--plot",  
+                // "--stride=1",
+            ]
+
         }
     ]
 }
