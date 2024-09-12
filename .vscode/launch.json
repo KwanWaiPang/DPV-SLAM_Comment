@@ -97,6 +97,26 @@
                 // "--stride=1",
             ]
 
-        }
+        },
+
+        {
+            "name": "mono_hku",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "evaluate_mono_hku.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "3"
+            },
+            "args":[
+                "--inputdir=/media/lfl-data2/Mono_HKU",
+                "--trials=1",
+                "--network=/home/gwp/DPVO/dpvo.pth", 
+                "--plot",  
+                "--save_trajectory",
+                // "--stride=1",
+            ]
+
+        },
     ]
 }
