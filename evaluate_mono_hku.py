@@ -81,16 +81,16 @@ if __name__ == '__main__':
     torch.manual_seed(1234)
 
     euroc_scenes = [
-        "vicon_aggressive_hdr",
-        "vicon_dark1",
-        "vicon_dark2",
-        "vicon_darktolight1",
-        "vicon_darktolight2",
-        "vicon_hdr1",
-        "vicon_hdr2",
-        # "vicon_hdr3",
-        # "vicon_hdr4",
-        # "vicon_lighttodark1",
+        # "vicon_aggressive_hdr",
+        # "vicon_dark1",
+        # "vicon_dark2",
+        # "vicon_darktolight1",
+        # "vicon_darktolight2",
+        # "vicon_hdr1",
+        # "vicon_hdr2",
+        "vicon_hdr3",
+        "vicon_hdr4",
+        "vicon_lighttodark1",
         # "vicon_lighttodark2",
     ]
 
