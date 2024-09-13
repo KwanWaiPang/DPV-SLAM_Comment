@@ -88,10 +88,10 @@ if __name__ == '__main__':
         # "vicon_darktolight2",
         # "vicon_hdr1",
         # "vicon_hdr2",
-        "vicon_hdr3",
-        "vicon_hdr4",
-        "vicon_lighttodark1",
-        # "vicon_lighttodark2",
+        # "vicon_hdr3",
+        # "vicon_hdr4",
+        # "vicon_lighttodark1",
+        "vicon_lighttodark2",
     ]
 
     results = {}
