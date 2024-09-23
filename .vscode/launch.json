@@ -118,5 +118,25 @@
             ]
 
         },
+
+        {
+            "name": "mvsec",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "evaluate_mvsec.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "3"
+            },
+            "args":[
+                "--inputdir=/media/lfl-data2/MVSEC",
+                "--trials=1",
+                "--network=/home/gwp/DPVO/dpvo.pth", 
+                "--plot",  
+                "--save_trajectory",
+                // "--stride=1",
+            ]
+
+        },
     ]
 }
