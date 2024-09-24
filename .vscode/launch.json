@@ -126,7 +126,7 @@
             "program": "evaluate_mvsec.py",
             "console": "integratedTerminal",
             "env": {
-                "CUDA_VISIBLE_DEVICES": "3"
+                "CUDA_VISIBLE_DEVICES": "0"
             },
             "args":[
                 "--inputdir=/media/lfl-data2/MVSEC",

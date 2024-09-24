@@ -81,10 +81,10 @@ if __name__ == '__main__':
     torch.manual_seed(1234)
 
     mvsec_scenes = [
-        "indoor_flying1_data",
+        # "indoor_flying1_data",
         # "indoor_flying2_data",
         # "indoor_flying3_data",
-        # "indoor_flying4_data",
+        "indoor_flying4_data",
     ]
 
     results = {}
