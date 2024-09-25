@@ -31,7 +31,8 @@ def run(cfg, network, imagedir, calib, stride=1, viz=False, show_img=False, imst
     slam = None
 
     queue = Queue(maxsize=8)
-    reader = Process(target=image_stream_start_stop, args=(queue, imagedir, calib, stride, imstart,imstop))#多线程调用image_stream函数
+    # reader = Process(target=image_stream_start_stop, args=(queue, imagedir, calib, stride, imstart,imstop))#多线程调用image_stream函数
+    reader = Process(target=image_stream, args=(queue, imagedir, calib, stride, 0))#多线程调用image_stream函数
     reader.start()
 
     while 1:
@@ -85,15 +86,23 @@ if __name__ == '__main__':
 
     fpv_scenes = [
         "indoor_forward_3_davis_with_gt",
+        "indoor_forward_5_davis_with_gt",
+        "indoor_forward_6_davis_with_gt",
+        "indoor_forward_7_davis_with_gt",
+        "indoor_forward_9_davis_with_gt",
+        "indoor_forward_10_davis_with_gt",
+        "indoor_45_2_davis_with_gt",
+        "indoor_45_4_davis_with_gt",
+        "indoor_45_9_davis_with_gt",
     ]
 
     results = {}
     for scene in fpv_scenes:
-        # imagedir = os.path.join(args.inputdir, scene, "images_undistorted")#传入的是去除失真后的图像
-        imagedir = os.path.join(args.inputdir, scene, "img")#传入的是原始图像
+        imagedir = os.path.join(args.inputdir, scene, "images_undistorted")#传入的是去除失真后的图像
+        # imagedir = os.path.join(args.inputdir, scene, "img")#传入的是原始图像
         groundtruth = os.path.join(args.inputdir, scene, "stamped_groundtruth_us.txt") #"datasets/euroc_groundtruth/{}.txt".format(scene) 
-        # calibdir = os.path.join(args.inputdir, scene, "calib_undist.txt")
-        calibdir = "/media/lfl-data2/UZH-FPV/indoor_45_calib_davis/calib_left.txt"#原本失真参数
+        calibdir = os.path.join(args.inputdir, scene, "calib_undist.txt")
+        # calibdir = "/media/lfl-data2/UZH-FPV/indoor_45_calib_davis/calib_left.txt"#原本失真参数
         image_timestamps = os.path.join(args.inputdir, scene, "images_timestamps_us.txt")
 
         scene_results = []
@@ -102,14 +111,14 @@ if __name__ == '__main__':
             # 运行dpvo主程序
             traj_est, timestamps = run(cfg, args.network, imagedir, calibdir, args.stride, args.viz, args.show_img, imstart=args.imstart, imstop=args.imstop)
 
-            images_list = sorted(glob.glob(os.path.join(imagedir, "*.png")))[args.imstart:args.imstop:args.stride]
+            # images_list = sorted(glob.glob(os.path.join(imagedir, "*.png")))[args.imstart:args.imstop:args.stride]
             # tstamps = [float(x.split('/')[-1][:-4]) for x in images_list]#获取时间戳
             tstamps=np.loadtxt(image_timestamps)#注意时间戳的单位
             # 按照args.stride来取时间戳
-            # tstamps = tstamps[::args.stride]
+            tstamps = tstamps[::args.stride]
             # tstamps = tstamps[args.skip::args.stride]
-            tstamps = tstamps[args.imstart:args.imstop:args.stride]
-            assert len(tstamps) == len(images_list)
+            # tstamps = tstamps[args.imstart:args.imstop:args.stride]
+            # assert len(tstamps) == len(images_list)
             assert len(tstamps) == len(timestamps)
 
             traj_est = PoseTrajectory3D(
