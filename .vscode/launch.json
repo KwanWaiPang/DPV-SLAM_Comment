@@ -138,5 +138,26 @@
             ]
 
         },
+
+
+        {
+            "name": "uzh_fpv",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "evaluate_fpv.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0"
+            },
+            "args":[
+                "--inputdir=/media/lfl-data2/UZH-FPV",
+                "--trials=1",
+                "--network=/home/gwp/DPVO/dpvo.pth", 
+                "--plot",  
+                "--save_trajectory",
+                // "--stride=1",
+            ]
+
+        },
     ]
 }

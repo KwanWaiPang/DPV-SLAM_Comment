@@ -25,7 +25,8 @@ def plot_trajectory(pred_traj, gt_traj=None, title="", filename="", align=True, 
 
     plot_collection = plot.PlotCollection("PlotCol")
     fig = plt.figure(figsize=(8, 8))
-    plot_mode = plot.PlotMode.xz # ideal for planar movement
+    # plot_mode = plot.PlotMode.xz # ideal for planar movement
+    plot_mode = plot.PlotMode.xy # ideal for planar movement
     ax = plot.prepare_axis(fig, plot_mode)
     ax.set_title(title)
     if gt_traj is not None:
